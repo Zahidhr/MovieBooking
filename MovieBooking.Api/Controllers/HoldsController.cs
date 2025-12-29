@@ -19,16 +19,9 @@ public sealed class HoldsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CreateHoldResponse>> Create(Guid screeningId, CreateHoldRequest request, CancellationToken ct)
     {
-        try
-        {
-            var seats = request.Seats.Select(s => (s.RowNumber, s.SeatNumber)).ToList();
-            var holdId = await _holdService.CreateHoldAsync(screeningId, seats, ct);
-            return Ok(new CreateHoldResponse(holdId));
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
-    }
+        var seats = request.Seats.Select(s => (s.RowNumber, s.SeatNumber)).ToList();
+        var holdId = await _holdService.CreateHoldAsync(screeningId, seats, ct);
 
+        return Ok(new CreateHoldResponse(holdId));
+    }
 }

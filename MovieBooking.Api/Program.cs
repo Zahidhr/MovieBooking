@@ -7,6 +7,7 @@ using MovieBooking.Application.Services;
 using MovieBooking.Infrastructure.Persistence;
 using MovieBooking.Infrastructure.Repositories;
 using MovieBooking.Infrastructure.Services;
+using MovieBooking.Api.ExceptionHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 
 builder.Services.AddDbContext<MovieBookingDbContext>(options =>
@@ -51,6 +55,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler();
+
 
 app.UseHttpsRedirection();
 

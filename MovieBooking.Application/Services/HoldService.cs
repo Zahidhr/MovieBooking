@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using MovieBooking.Application.Exceptions;
 using MovieBooking.Application.Interfaces;
 using MovieBooking.Application.Interfaces.Persistence;
 using MovieBooking.Application.Interfaces.Services;
@@ -63,7 +64,10 @@ public sealed class HoldService
             ct);
 
         if (!success)
-            throw new InvalidOperationException("One or more seats are not available.");
+               throw new ConflictException(
+                "One or more seats are not available.",
+                "SEAT_NOT_AVAILABLE");
+
 
         return hold.HoldId;
     }
