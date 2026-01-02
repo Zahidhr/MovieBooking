@@ -39,10 +39,13 @@ public sealed class HoldService
         CancellationToken ct)
     {
         if (seats.Count == 0)
-            throw new ArgumentException("At least one seat is required.");
+            throw new ValidationException(
+                "At least one seat is required.",
+                "EMPTY_SEAT_SELECTION");
+
 
         if (!await _screeningRepo.ExistsAsync(screeningId, ct))
-            throw new InvalidOperationException("Screening not found.");
+            throw new NotFoundException("Screening not found.");
 
         // Lazy cleanup now (Hangfire later will call same cleanup)
         await _cleanup.CleanupExpiredByScreeningAsync(screeningId, ct);
