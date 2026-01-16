@@ -72,8 +72,6 @@ public sealed class SeatReservationRepository : ISeatReservationRepository
             }
         }
 
-        await _db.SaveChangesAsync(ct);
-        await tx.CommitAsync(ct);
         return true;
     }
 }

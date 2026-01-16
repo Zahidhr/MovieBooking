@@ -56,7 +56,21 @@ public sealed class HoldService
         var hold = new Hold(screeningId, expiresAt, now);
 
         // Save hold first so we have HoldId
-        await _holdRepo.AddAsync(hold, ct);
+        _holdRepo.Add(hold);
+
+        var capacity = await _screeningRepo.GetSeatCapacityAsync(screeningId, ct);
+
+        foreach (var (row, seat) in seats)
+        {
+            if (row < 1 || row > capacity.RowCount ||
+                seat < 1 || seat > capacity.SeatsPerRow)
+            {
+                throw new ValidationException(
+                    $"Seat ({row},{seat}) is out of range. Layout is {capacity.RowCount}x{capacity.SeatsPerRow}.",
+                    "SEAT_OUT_OF_RANGE");
+            }
+        }
+
 
         var success = await _seatRepo.TryHoldSeatsAsync(
             screeningId,

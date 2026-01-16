@@ -9,9 +9,8 @@ public sealed class HoldRepository : IHoldRepository
     private readonly MovieBookingDbContext _db;
     public HoldRepository(MovieBookingDbContext db) => _db = db;
 
-    public async Task AddAsync(Hold hold, CancellationToken ct)
+    public void Add(Hold hold)
     {
         _db.Holds.Add(hold);
-        await _db.SaveChangesAsync(ct);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MovieBooking.Application.Exceptions;
 using MovieBooking.Application.Interfaces.Persistence;
 using MovieBooking.Domain.Screenings;
 using MovieBooking.Infrastructure.Persistence;
@@ -11,10 +12,10 @@ public sealed class ScreeningRepository : IScreeningRepository
 
     public ScreeningRepository(MovieBookingDbContext db) => _db = db;
 
-    public async Task AddAsync(Screening screening, CancellationToken ct)
+    public Task AddAsync(Screening screening, CancellationToken ct)
     {
         _db.Screenings.Add(screening);
-        await _db.SaveChangesAsync(ct);
+        return Task.CompletedTask;
     }
 
     public Task<bool> HasOverlapAsync(
@@ -47,6 +48,31 @@ public sealed class ScreeningRepository : IScreeningRepository
         return _db.Screenings
             .AsNoTracking()
             .AnyAsync(s => s.ScreeningId == screeningId, ct);
+    }
+
+    public async Task<ScreeningSeatCapacity> GetSeatCapacityAsync(Guid screeningId, CancellationToken ct)
+    {
+        var capacity = await _db.Screenings
+            .AsNoTracking()
+            .Where(s => s.ScreeningId == screeningId)
+            .Join(
+                _db.Rooms,
+                s => s.RoomId,
+                r => r.RoomId,
+                (s, r) => r.LayoutId
+            )
+            .Join(
+                _db.Layouts,
+                layoutId => layoutId,
+                l => l.LayoutId,
+                (layoutId, l) => new ScreeningSeatCapacity(l.RowCount, l.SeatsPerRow)
+            )
+            .SingleOrDefaultAsync(ct);
+
+        if (capacity is null)
+            throw new NotFoundException("Screening not found.");
+
+        return capacity;
     }
 
 }

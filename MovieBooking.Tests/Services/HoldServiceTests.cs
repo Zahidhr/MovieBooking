@@ -85,6 +85,14 @@ public sealed class HoldServiceTests
             .Setup(x => x.ExistsAsync(screeningId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
+        _cleanup
+            .Setup(x => x.CleanupExpiredByScreeningAsync(screeningId, It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        _screeningRepo
+            .Setup(x => x.GetSeatCapacityAsync(screeningId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ScreeningSeatCapacity(10, 10));
+
         _seatRepo
             .Setup(x => x.TryHoldSeatsAsync(
                 screeningId,
@@ -104,15 +112,24 @@ public sealed class HoldServiceTests
         ex.ErrorCode.Should().Be("SEAT_NOT_AVAILABLE");
     }
 
+
     [Fact]
     public async Task CreateHoldAsync_WhenSuccessful_ReturnsHoldId()
     {
         var sut = CreateSut(10);
         var screeningId = Guid.NewGuid();
 
+        _cleanup
+            .Setup(x => x.CleanupExpiredByScreeningAsync(screeningId, It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
         _screeningRepo
             .Setup(x => x.ExistsAsync(screeningId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
+
+        _screeningRepo
+            .Setup(x => x.GetSeatCapacityAsync(screeningId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ScreeningSeatCapacity(10, 10));
 
         _seatRepo
             .Setup(x => x.TryHoldSeatsAsync(
@@ -130,6 +147,7 @@ public sealed class HoldServiceTests
             CancellationToken.None);
 
         holdId.Should().NotBeEmpty();
-        _holdRepo.Verify(x => x.AddAsync(It.IsAny<Hold>(), It.IsAny<CancellationToken>()), Times.Once);
+        _holdRepo.Verify(x => x.Add(It.IsAny<Hold>()), Times.Once);
     }
+
 }

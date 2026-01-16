@@ -4,5 +4,8 @@ namespace MovieBooking.Application.Interfaces.Persistence;
 
 public interface IHoldRepository
 {
-    Task AddAsync(Hold hold, CancellationToken ct);
+    /// <summary>
+    /// Stages a new Hold entity for insertion. Does NOT call SaveChanges.
+    /// </summary>
+    void Add(Hold hold);
 }

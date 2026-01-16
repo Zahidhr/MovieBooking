@@ -16,4 +16,8 @@ public interface IScreeningRepository
 
     Task<bool> ExistsAsync(Guid screeningId, CancellationToken ct);
 
+    Task<ScreeningSeatCapacity> GetSeatCapacityAsync(
+    Guid screeningId,
+    CancellationToken ct);
+
 }
